@@ -96,6 +96,17 @@ endif
 endif
 endif
 
+App_Link_Flags += \
+	-ldl \
+	-Wl,-rpath=$(SGX_LIBRARY_PATH) \
+	-Wl,-whole-archive -lSGXSanRTApp -Wl,-no-whole-archive \
+	-lSGXFuzzerRT \
+	-lcrypto \
+	-lboost_program_options \
+	-rdynamic
+ifeq ($(KAFL_FUZZER), 1)
+App_Link_Flags += -lnyx_agent
+endif
 
 .PHONY: all run
 
@@ -121,21 +132,23 @@ endif
 ######## App Objects ########
 
 $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.c: $(SGX_EDGER8R) trusted/Wolfssl_Enclave.edl
-	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../trusted/Wolfssl_Enclave.edl --search-path ../trusted --search-path $(SGX_SDK)/include
+	@cd $(UNTRUSTED_DIR) && $(SGX_EDGER8R) --untrusted ../trusted/Wolfssl_Enclave.edl --search-path ../trusted --search-path $(SGX_SDK)/include --dump-parse ../Enclave.edl.json
 	@echo "GEN  =>  $@"
 
 $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.o: $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.c
 	@echo $(CC) $(App_C_Flags) -c $< -o $@
-	@$(CC) $(App_C_Flags) -c $< -o $@
+	@$(CC) $(App_C_Flags) -c $< -o $@ \
+	-flegacy-pass-manager \
+	-Xclang -load -Xclang $(SGX_SDK)/lib64/libSGXFuzzerPass.so
 	@echo "CC   <=  $<"
 
-$(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.c
+$(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.c $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.o
 	@echo $(CC) $(App_C_Flags) -c $< -o $@
 	@$(CC) $(App_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
 App: $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.o $(App_C_Objects)
-	@$(CC) $^ -o $@ $(App_Link_Flags)
+	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
 

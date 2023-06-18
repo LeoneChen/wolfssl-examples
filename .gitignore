@@ -303,3 +303,13 @@ tpm/evp_tpm
 **/main/build/CMakeFiles/*
 **/build/*
 
+Wolfssl_Enclave_t.c
+Wolfssl_Enclave_t.h
+Wolfssl_Enclave_u.c
+Wolfssl_Enclave_u.h
+*.so
+*.o
+App
+Enclave.edl.json
+vtune
+InstrumentStatistics.json

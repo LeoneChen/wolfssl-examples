@@ -10,8 +10,8 @@ endif
 
 
 all:
-	$(MAKE) -ef sgx_u.mk all
 	$(MAKE) -ef sgx_t.mk all
+	$(MAKE) -ef sgx_u.mk all
 
 clean:
 	$(MAKE) -ef sgx_u.mk clean
