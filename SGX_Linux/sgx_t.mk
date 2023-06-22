@@ -153,3 +153,4 @@ Wolfssl_Enclave.signed.so: Wolfssl_Enclave.so
 	@echo "SIGN =>  $@"
 clean:
 	@rm -f Wolfssl_Enclave.* trusted/Wolfssl_Enclave_t.*  $(Wolfssl_Enclave_C_Objects)
+	@rm -f InstrumentStatistics.json
