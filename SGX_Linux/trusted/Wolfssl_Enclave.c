@@ -25,6 +25,7 @@
 #include "Wolfssl_Enclave_t.h"
 
 #include "sgx_trts.h"
+#include "kafl_hc.h"
 
 
 #if defined(XMALLOC_USER) || defined(XMALLOC_OVERRIDE)
@@ -130,6 +131,7 @@ static void checkHeapHint(WOLFSSL_CTX* ctx, WOLFSSL* ssl)
 
 int wc_test(void* args)
 {
+    LogEnter(__func__);
 #ifdef HAVE_WOLFSSL_TEST
 	return wolfcrypt_test(args);
 #else
@@ -140,6 +142,7 @@ int wc_test(void* args)
 
 int wc_benchmark_test(void* args)
 {
+    LogEnter(__func__);
 
 #ifdef HAVE_WOLFSSL_BENCHMARK
     return benchmark_test(args);
@@ -151,16 +154,19 @@ int wc_benchmark_test(void* args)
 
 void enc_wolfSSL_Debugging_ON(void)
 {
+    LogEnter(__func__);
     wolfSSL_Debugging_ON();
 }
 
 void enc_wolfSSL_Debugging_OFF(void)
 {
+    LogEnter(__func__);
     wolfSSL_Debugging_OFF();
 }
 
 int enc_wolfSSL_Init(void)
 {
+    LogEnter(__func__);
     return wolfSSL_Init();
 }
 
@@ -170,11 +176,13 @@ int enc_wolfSSL_Init(void)
 
 long enc_wolfTLSv1_2_client_method(void)
 {
+    LogEnter(__func__);
     return WOLFTLSv12_CLIENT;
 }
 
 long enc_wolfTLSv1_2_server_method(void)
 {
+    LogEnter(__func__);
     return WOLFTLSv12_SERVER;
 }
 
@@ -193,6 +201,7 @@ static WOLFSSL_METHOD* GetMethod(long id)
 
 long enc_wolfSSL_CTX_new(long method)
 {
+    LogEnter(__func__);
     WOLFSSL_CTX* ctx;
     long id = -1;
 
@@ -206,6 +215,7 @@ long enc_wolfSSL_CTX_new(long method)
 int enc_wolfSSL_CTX_use_certificate_chain_buffer_format(long id,
         const unsigned char* buf, long sz, int type)
 {
+    LogEnter(__func__);
     WOLFSSL_CTX* ctx = GetCTX(id);
     if (ctx == NULL) {
         return -1;
@@ -216,6 +226,7 @@ int enc_wolfSSL_CTX_use_certificate_chain_buffer_format(long id,
 int enc_wolfSSL_CTX_use_certificate_buffer(long id,
         const unsigned char* buf, long sz, int type)
 {
+    LogEnter(__func__);
     WOLFSSL_CTX* ctx = GetCTX(id);
     if (ctx == NULL) {
         return -1;
@@ -226,6 +237,7 @@ int enc_wolfSSL_CTX_use_certificate_buffer(long id,
 int enc_wolfSSL_CTX_use_PrivateKey_buffer(long id, const unsigned char* buf,
                                             long sz, int type)
 {
+    LogEnter(__func__);
     WOLFSSL_CTX* ctx = GetCTX(id);
     if (ctx == NULL) {
         return -1;
@@ -236,6 +248,7 @@ int enc_wolfSSL_CTX_use_PrivateKey_buffer(long id, const unsigned char* buf,
 int enc_wolfSSL_CTX_load_verify_buffer(long id, const unsigned char* in,
                                        long sz, int format)
 {
+    LogEnter(__func__);
     WOLFSSL_CTX* ctx = GetCTX(id);
     if (ctx == NULL) {
         return -1;
@@ -246,6 +259,7 @@ int enc_wolfSSL_CTX_load_verify_buffer(long id, const unsigned char* in,
 
 int enc_wolfSSL_CTX_set_cipher_list(long id, const char* list)
 {
+    LogEnter(__func__);
     WOLFSSL_CTX* ctx = GetCTX(id);
     if (ctx == NULL) {
         return -1;
@@ -255,6 +269,7 @@ int enc_wolfSSL_CTX_set_cipher_list(long id, const char* list)
 
 long enc_wolfSSL_new(long id)
 {
+    LogEnter(__func__);
     WOLFSSL_CTX* ctx;
     WOLFSSL* ssl;
     long ret = -1;
@@ -272,6 +287,7 @@ long enc_wolfSSL_new(long id)
 
 int enc_wolfSSL_set_fd(long sslId, int fd)
 {
+    LogEnter(__func__);
     WOLFSSL* ssl = GetSSL(sslId);
     if (ssl == NULL) {
         return -1;
@@ -281,6 +297,7 @@ int enc_wolfSSL_set_fd(long sslId, int fd)
 
 int enc_wolfSSL_connect(long sslId)
 {
+    LogEnter(__func__);
     WOLFSSL* ssl = GetSSL(sslId);
     if (ssl == NULL) {
         return -1;
@@ -290,6 +307,7 @@ int enc_wolfSSL_connect(long sslId)
 
 int enc_wolfSSL_write(long sslId, const void* in, int sz)
 {
+    LogEnter(__func__);
     WOLFSSL* ssl = GetSSL(sslId);
     if (ssl == NULL) {
         return -1;
@@ -299,6 +317,7 @@ int enc_wolfSSL_write(long sslId, const void* in, int sz)
 
 int enc_wolfSSL_get_error(long sslId, int ret)
 {
+    LogEnter(__func__);
     WOLFSSL* ssl = GetSSL(sslId);
     if (ssl == NULL) {
         return -1;
@@ -308,6 +327,7 @@ int enc_wolfSSL_get_error(long sslId, int ret)
 
 int enc_wolfSSL_read(long sslId, void* data, int sz)
 {
+    LogEnter(__func__);
     WOLFSSL* ssl = GetSSL(sslId);
     if (ssl == NULL) {
         return -1;
@@ -317,16 +337,19 @@ int enc_wolfSSL_read(long sslId, void* data, int sz)
 
 void enc_wolfSSL_free(long sslId)
 {
+    LogEnter(__func__);
     RemoveSSL(sslId);
 }
 
 void enc_wolfSSL_CTX_free(long id)
 {
+    LogEnter(__func__);
     RemoveCTX(id);
 }
 
 int enc_wolfSSL_Cleanup(void)
 {
+    LogEnter(__func__);
     long id;
 
     /* free up all WOLFSSL's */
