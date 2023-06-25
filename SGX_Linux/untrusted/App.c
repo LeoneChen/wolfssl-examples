@@ -38,7 +38,7 @@ typedef struct func_args {
     int    return_code;
 } func_args;
 
-int main(int argc, char* argv[]) /* not using since just testing w/ wc_test */
+int __hidden_main(int argc, char* argv[]) /* not using since just testing w/ wc_test */
 {
 	sgx_enclave_id_t id;
 	sgx_launch_token_t t;

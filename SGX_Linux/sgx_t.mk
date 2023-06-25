@@ -67,17 +67,16 @@ ifeq ($(HAVE_WOLFSSL_SP), 1)
 endif
 
 Flags_Just_For_C := -Wno-implicit-function-declaration -std=c11
-Common_C_Cpp_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Wolfssl_Enclave_Include_Paths)-fno-builtin -fno-builtin-printf -I.
+Common_C_Cpp_Flags := $(SGX_COMMON_CFLAGS) -fvisibility=hidden -fPIC -fstack-protector $(Wolfssl_Enclave_Include_Paths) -fno-builtin -fno-builtin-printf -I.
 Wolfssl_Enclave_C_Flags := $(Flags_Just_For_C) $(Common_C_Cpp_Flags) $(Wolfssl_C_Extra_Flags)
 
-Wolfssl_Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) \
+Wolfssl_Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) \
 	-L$(SGX_WOLFSSL_LIB) -lwolfssl.sgx.static.lib \
-	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
-	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -l$(Crypto_Library_Name) -l$(Service_Library_Name) -Wl,--end-group \
-	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
-	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
-	-Wl,--defsym,__ImageBase=0 \
-	-Wl,--version-script=trusted/Wolfssl_Enclave.lds
+	-Wl,--whole-archive -lSGXSanRTEnclave -l$(Trts_Library_Name) -Wl,--no-whole-archive \
+	-Wl,--start-group -l$(Crypto_Library_Name) -l$(Service_Library_Name) -Wl,--end-group \
+	-Wl,-Bsymbolic \
+	-Wl,-eenclave_entry -Wl,--export-dynamic  \
+	-Wl,--defsym,__ImageBase=0
 
 Wolfssl_Enclave_C_Objects := $(Wolfssl_Enclave_C_Files:.c=.o)
 
@@ -92,6 +91,22 @@ endif
 endif
 endif
 
+ifeq ($(KAFL_FUZZER), 1)
+Wolfssl_Enclave_C_Flags += \
+	-fno-discard-value-names \
+	-flegacy-pass-manager \
+	-Xclang -load -Xclang $(SGX_SDK)/lib64/libSGXSanPass.so
+Wolfssl_Enclave_Link_Flags += -shared
+else
+Wolfssl_Enclave_C_Flags += \
+	-fno-discard-value-names \
+	-flegacy-pass-manager \
+	-Xclang -load -Xclang $(SGX_SDK)/lib64/libSGXSanPass.so \
+	-fsanitize-coverage=inline-8bit-counters,bb,no-prune,pc-table,trace-cmp \
+	-fprofile-instr-generate \
+	-fcoverage-mapping
+Wolfssl_Enclave_Link_Flags += -shared -fuse-ld=$(LD) -fprofile-instr-generate
+endif
 
 .PHONY: all run
 
@@ -104,7 +119,7 @@ all: Wolfssl_Enclave.so
 	@echo "*********************************************************************************************************************************************************"
 	@echo
 else
-all: Wolfssl_Enclave.signed.so
+all: Wolfssl_Enclave.so
 endif
 
 run: all
@@ -124,7 +139,7 @@ trusted/Wolfssl_Enclave_t.o: ./trusted/Wolfssl_Enclave_t.c
 	@$(CC) $(Wolfssl_Enclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-trusted/%.o: trusted/%.c
+trusted/%.o: trusted/%.c trusted/Wolfssl_Enclave_t.c
 	@echo $(CC) $(Wolfssl_Enclave_C_Flags) -c $< -o $@
 	@$(CC) $(Wolfssl_Enclave_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
