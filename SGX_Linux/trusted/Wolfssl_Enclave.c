@@ -339,6 +339,7 @@ int enc_wolfSSL_Cleanup(void)
     wolfSSL_Cleanup();
 }
 
+#if 0
 void printf(const char *fmt, ...)
 {
     char buf[BUFSIZ] = {'\0'};
@@ -348,6 +349,7 @@ void printf(const char *fmt, ...)
     va_end(ap);
     ocall_print_string(buf);
 }
+#endif
 
 int sprintf(char* buf, const char *fmt, ...)
 {

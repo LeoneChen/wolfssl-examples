@@ -96,6 +96,11 @@ endif
 endif
 endif
 
+App_Link_Flags += \
+	-ldl \
+	-Wl,-rpath=$(SGX_LIBRARY_PATH) \
+	-Wl,-whole-archive -lSGXSanRTApp -Wl,-no-whole-archive \
+	-rdynamic
 
 .PHONY: all run
 
@@ -129,13 +134,14 @@ $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.o: $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.c
 	@$(CC) $(App_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
+$(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.c
 $(UNTRUSTED_DIR)/%.o: $(UNTRUSTED_DIR)/%.c
 	@echo $(CC) $(App_C_Flags) -c $< -o $@
 	@$(CC) $(App_C_Flags) -c $< -o $@
 	@echo "CC  <=  $<"
 
 App: $(UNTRUSTED_DIR)/Wolfssl_Enclave_u.o $(App_C_Objects)
-	@$(CC) $^ -o $@ $(App_Link_Flags)
+	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
 
